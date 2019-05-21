@@ -2,12 +2,29 @@ FROM debian:9-slim
 
 ENV BOOST_VERSION 1.70.0
 ENV LIBTORRENT_VERSION 1.2.1
+ENV GRPC_VERSION 1.20.1
+ENV PROTOBUF_VERSION 3.7.1
 
 RUN apt update \
- && apt -y install g++ wget make \
+ && apt -y install g++ wget make zlib1g-dev libc-ares-dev libssl-dev \
  && rm -rf /var/lib/apt/lists/* \
  && mkdir -p /opt/ \
  && echo "using gcc ;" > /root/user.jam
+
+RUN wget -q https://github.com/grpc/grpc/archive/v$GRPC_VERSION.tar.gz -O /opt/grpc.tgz \
+ && cd /opt \
+ && tar -xf grpc.tgz \
+ && rm grpc.tgz \
+ && mv grpc* grpc \
+ && rmdir /opt/grpc/third_party/protobuf/ \
+ && wget -q https://github.com/protocolbuffers/protobuf/releases/download/v$PROTOBUF_VERSION/protobuf-cpp-$PROTOBUF_VERSION.tar.gz -O /opt/protobuf.tgz \
+ && tar -xf protobuf.tgz \
+ && rm protobuf.tgz \
+ && mv protobuf* /opt/grpc/third_party/protobuf/ \
+ && cd grpc \
+ && make -j $(nproc) static \
+ && make install
+
 
 RUN export _BOOST_VERSION=$(echo $BOOST_VERSION|tr . _) \
  && wget -q https://dl.bintray.com/boostorg/release/$BOOST_VERSION/source/boost_${_BOOST_VERSION}.tar.gz -O /opt/boost.tgz \
@@ -27,7 +44,8 @@ RUN export _LIBTORRENT_VERSION=$(echo $LIBTORRENT_VERSION|tr . _) \
  && rm libtorrent.tgz \
  && mv libtorrent* libtorrent \
  && cd libtorrent \
- && /opt/boost/b2 runtime-link=static link=static boost-link=static -j 12
+ && /opt/boost/b2 runtime-link=static link=static boost-link=static -j $(nproc)
+
 
 WORKDIR /usr/src/
 
