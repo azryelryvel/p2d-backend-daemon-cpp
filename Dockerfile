@@ -23,8 +23,9 @@ RUN wget -q https://github.com/grpc/grpc/archive/v$GRPC_VERSION.tar.gz -O /opt/g
  && mv protobuf* /opt/grpc/third_party/protobuf/ \
  && cd grpc \
  && make -j $(nproc) static \
+ && make install \
+ && cd /opt/grpc/third_party/protobuf \
  && make install
-
 
 RUN export _BOOST_VERSION=$(echo $BOOST_VERSION|tr . _) \
  && wget -q https://dl.bintray.com/boostorg/release/$BOOST_VERSION/source/boost_${_BOOST_VERSION}.tar.gz -O /opt/boost.tgz \
