@@ -55,6 +55,6 @@ COPY src/main/ Makefile /usr/src/
 RUN cd /usr/src \
  && make
 
-CMD /usr/src/p2pd magnet "magnet:?xt=urn:btih:b47882a62eedec7767aa86b7a866f1dd846c5357&dn=Harry+Potter+and+the+Sorcerers+Stone+%282001%29+1080p+BrRip+x264+-+1&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Fexodus.desync.com%3A6969"
+#CMD /usr/src/p2pd magnet "magnet:?xt=urn:btih:b47882a62eedec7767aa86b7a866f1dd846c5357&dn=Harry+Potter+and+the+Sorcerers+Stone+%282001%29+1080p+BrRip+x264+-+1&tr=udp%3A%2F%2Ftracker.leechers-paradise.org%3A6969&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80&tr=udp%3A%2F%2Fopen.demonii.com%3A1337&tr=udp%3A%2F%2Ftracker.coppersurfer.tk%3A6969&tr=udp%3A%2F%2Fexodus.desync.com%3A6969"
 
 
