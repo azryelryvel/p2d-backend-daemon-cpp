@@ -3,6 +3,8 @@
 #include <chrono>
 #include <fstream>
 #include <cstdlib>
+#include <memory>
+#include <string>
 
 #include <libtorrent/session.hpp>
 #include <libtorrent/add_torrent_params.hpp>
@@ -17,7 +19,19 @@
 #include <libtorrent/entry.hpp>
 #include <libtorrent/torrent_info.hpp>
 
+#include <grpcpp/grpcpp.h>
+
 using clk = std::chrono::steady_clock;
+
+#include "helloworld.grpc.pb.h"
+
+using grpc::Server;
+using grpc::ServerBuilder;
+using grpc::ServerContext;
+using grpc::Status;
+using helloworld::HelloRequest;
+using helloworld::HelloReply;
+using helloworld::Greeter;
 
 char const* state(lt::torrent_status::state_t s) {
   switch(s) {
@@ -131,6 +145,34 @@ done:
   std::cout << "\ndone, shutting down" << std::endl;
 }
 
+// Logic and data behind the server's behavior.
+class GreeterServiceImpl final : public Greeter::Service {
+  Status SayHello(ServerContext* context, const HelloRequest* request, HelloReply* reply) override {
+    std::string prefix("Hello ");
+    reply->set_message(prefix + request->name());
+    return Status::OK;
+  }
+};
+
+void runServer() {
+  std::string server_address("0.0.0.0:50051");
+  GreeterServiceImpl service;
+
+  ServerBuilder builder;
+  // Listen on the given address without any authentication mechanism.
+  builder.AddListeningPort(server_address, grpc::InsecureServerCredentials());
+  // Register "service" as the instance through which we'll communicate with
+  // clients. In this case it corresponds to an *synchronous* service.
+  builder.RegisterService(&service);
+  // Finally assemble the server.
+  std::unique_ptr<Server> server(builder.BuildAndStart());
+  std::cout << "Server listening on " << server_address << std::endl;
+
+  // Wait for the server to shutdown. Note that some other thread must be
+  // responsible for shutting down the server for this call to ever return.
+  server->Wait();
+}
+
 int main(int argc, const char* argv[]) try {
     std::string type(argv[1]);
     std::string data(argv[2]);
@@ -139,8 +181,11 @@ int main(int argc, const char* argv[]) try {
         torrent(data);
     } else if (type == "magnet") {
         magnet(data);
+    } else {
+        runServer();
     }
 }
 catch (std::exception const& e) {
   std::cerr << "ERROR: " << e.what() << "\n";
 }
+
