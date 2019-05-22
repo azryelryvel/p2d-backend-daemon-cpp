@@ -1,14 +1,16 @@
 # Compiler
 CXX=g++
 
-# Path to add to library path (-L)
-LIBRARY_PATH=/opt/libtorrent/bin/gcc-6.3.0/debug/link-static/threading-multi
+# Paths to add to library path (-L)
+LIBTORRENT_LIBRARY_PATH=/opt/libtorrent/bin/gcc-6.3.0/debug/link-static/threading-multi
+GRPC_LIBRARY_PATH=/opt/grpc/libs/opt
+PROTOBUF_LIBRARY_PATH=/opt/grpc/third_party/protobuf/src/.libs/
 
 # Libraries options
-LIBRARIES=-L$(LIBRARY_PATH) -ltorrent -lpthread
+LIBRARIES=-L$(LIBTORRENT_LIBRARY_PATH) -L$(GRPC_LIBRARY_PATH) -L${PROTOBUF_LIBRARY_PATH} -ltorrent -lpthread -lgrpc++ -lprotobuf -lgrpc -lcares -lz
 
 # Includes options
-INCLUDES=-Iincludes/ -I/opt/libtorrent/include/ -I/opt/boost/
+INCLUDES=-Iincludes -I/opt/libtorrent/include -I/opt/boost -I/opt/grpc/include -I/opt/grpc/third_party/protobuf/src/
 
 # Directory containing the sources
 SRC_PATH = cpp
@@ -53,6 +55,9 @@ dirs:
 	@mkdir -p $(dir $(OBJECTS))
 	@mkdir -p $(BIN_PATH)
 
+#    @echo "Generating protocol buffers"
+
+
 .PHONY: clean
 clean:
 	@echo "Deleting $(BIN_NAME) symlink"
@@ -71,7 +76,7 @@ all: $(BIN_PATH)/$(BIN_NAME)
 # Creation of the executable
 $(BIN_PATH)/$(BIN_NAME): $(OBJECTS)
 	@echo "Linking: $@"
-	$(CXX) $(OBJECTS) -o $@ $(LIBRARIES)
+	$(CXX) $(OBJECTS) -o $@ $(INCLUDES) $(LIBRARIES)
 
 # Source file rules
 # After the first compilation they will be joined with the rules from the

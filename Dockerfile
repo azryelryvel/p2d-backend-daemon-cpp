@@ -22,10 +22,10 @@ RUN wget -q https://github.com/grpc/grpc/archive/v$GRPC_VERSION.tar.gz -O /opt/g
  && rm protobuf.tgz \
  && mv protobuf* /opt/grpc/third_party/protobuf/ \
  && cd grpc \
- && make -j $(nproc) static \
- && make install \
- && cd /opt/grpc/third_party/protobuf \
- && make install
+ && make -j$(nproc) static \
+ && cd /opt/grpc/bins/opt \
+ && mv grpc_cpp_plugin /usr/local/bin/protoc-gen-grpc \
+ && mv protobuf/protoc /usr/local/bin/
 
 RUN export _BOOST_VERSION=$(echo $BOOST_VERSION|tr . _) \
  && wget -q https://dl.bintray.com/boostorg/release/$BOOST_VERSION/source/boost_${_BOOST_VERSION}.tar.gz -O /opt/boost.tgz \
@@ -52,5 +52,11 @@ WORKDIR /usr/src/
 
 COPY src/main/ Makefile /usr/src/
 
+COPY src/protos /usr/src/protos
+
 RUN cd /usr/src \
+ && for i in /usr/src/protos/*; do protoc -I/usr/src/protos --grpc_out=/usr/src/ ${i}; done \
+ && for i in /usr/src/protos/*; do protoc -I/usr/src/protos --cpp_out=/usr/src/ ${i}; done \
+ && for i in *.h; do mv $i includes/; done \
+ && for i in *.cc; do mv -- "$i" cpp/"${i%.cc}.cpp"; done \
  && make
