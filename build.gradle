@@ -1,0 +1,72 @@
+plugins {
+    id 'cpp-application'
+    id 'cpp-unit-test'
+}
+
+String LIBTORRENT_LIBRARY_PATH = "/opt/libtorrent/bin/gcc-6.3.0/debug/link-static/threading-multi"
+String GRPC_LIBRARY_PATH = "/opt/grpc/libs/opt"
+String PROTOBUF_LIBRARY_PATH = "/opt/grpc/third_party/protobuf/src/.libs"
+String SHARED_LIBRARIES_PATH = "/usr/lib/x86_64-linux-gnu"
+
+String BOOST_INCLUDE_PATH = "/opt/boost"
+String LIBTORRENT_INCLUDE_PATH = "/opt/libtorrent/include"
+String GRPC_INCLUDE_PATH = "/opt/grpc/include"
+String PROTOBUF_INCLUDE_PATH = "/opt/grpc/third_party/protobuf/src"
+
+application {
+    targetMachines.add(machines.linux.x86_64)
+    privateHeaders {
+        from(GRPC_INCLUDE_PATH)
+        from(LIBTORRENT_INCLUDE_PATH)
+        from(PROTOBUF_INCLUDE_PATH)
+        from(BOOST_INCLUDE_PATH)
+    }
+}
+
+dependencies {
+    implementation files(LIBTORRENT_LIBRARY_PATH + "/libtorrent.a")
+    implementation files(GRPC_LIBRARY_PATH + "/libgrpc.a")
+    implementation files(GRPC_LIBRARY_PATH + "/libgrpc++.a")
+    implementation files(PROTOBUF_LIBRARY_PATH + "/libprotobuf.a")
+    implementation files(SHARED_LIBRARIES_PATH + "/libpthread.so")
+    implementation files(SHARED_LIBRARIES_PATH + "/libz.so")
+    implementation files(SHARED_LIBRARIES_PATH + "/libcares.so")
+}
+
+model {
+    toolChains {
+        gcc(Gcc) {
+            eachPlatform {
+                cppCompiler.withArguments { args ->
+                    args << '-std=c++11'
+                    args << '-static'
+                }
+                linker.withArguments { args ->
+                    args << '-L' + LIBTORRENT_LIBRARY_PATH
+                    args << '-ltorrent'
+                    args << '-L' + GRPC_LIBRARY_PATH
+                    args << '-lgrpc'
+                    args << '-lgrpc++'
+                    args << '-L' + PROTOBUF_LIBRARY_PATH
+                    args << '-lprotobuf'
+                    args << '-lcares'
+                    args << '-lz'
+                    args << '-lpthread'
+                }
+            }
+        }
+    }
+    platforms {
+        x64 {
+            architecture "x86_64"
+        }
+    }
+}
+
+task generateProtocGrpc(type: Exec) {
+    commandLine 'bash', '-c', 'for i in src/main/proto/*; do protoc -Isrc/main/proto --grpc_out=src/main/cpp ${i}; done'
+}
+
+task generateProtocCpp(type: Exec) {
+    commandLine 'bash', '-c', 'for i in src/main/proto/*; do protoc -Isrc/main/proto --cpp_out=src/main/cpp ${i}; done'
+}

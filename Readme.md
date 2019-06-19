@@ -7,3 +7,12 @@ should still be modular (no p2pd-ui special dependency).
 It should roughly be able to download p2p data and allow them to seed, but more importantly, it should expose RPC 
 methods for listing, adding and removing data from its queues.
 
+## Building
+
+To build this application, run :
+
+```bash
+cd /path/to/the/project
+docker build -t p2pd-build .
+docker run -v $(pwd):/usr/src/ p2pd-build
+```
