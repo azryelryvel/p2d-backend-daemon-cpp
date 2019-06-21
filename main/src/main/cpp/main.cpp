@@ -24,6 +24,7 @@
 using clk = std::chrono::steady_clock;
 
 #include "helloworld.grpc.pb.h"
+#include "main.h"
 
 using grpc::Server;
 using grpc::ServerBuilder;
@@ -174,15 +175,17 @@ void runServer() {
 }
 
 int main(int argc, const char* argv[]) try {
-    std::string type(argv[1]);
-    std::string data(argv[2]);
-
-    if (type == "torrent") {
-        torrent(data);
-    } else if (type == "magnet") {
-        magnet(data);
-    } else {
+    if (argc < 3) {
         runServer();
+    } else {
+        std::string type(argv[1]);
+        std::string data(argv[2]);
+
+        if (type == "torrent") {
+            torrent(data);
+        } else if (type == "magnet") {
+            magnet(data);
+        }
     }
 }
 catch (std::exception const& e) {

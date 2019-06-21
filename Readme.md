@@ -14,5 +14,5 @@ To build this application, run :
 ```bash
 cd /path/to/the/project
 docker build -t p2pd-build .
-docker run -v $(pwd):/usr/src/ p2pd-build
+docker run -v $(pwd):/usr/src/ -v ${HOME}/.gradle/wrapper:/root/.gradle/wrapper p2pd-build
 ```

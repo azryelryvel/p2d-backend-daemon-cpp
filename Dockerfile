@@ -42,6 +42,4 @@ RUN apt update \
 
 WORKDIR /usr/src/
 
-CMD ./gradlew generateProtocGrpc generateProtocCpp build
-
-# /usr/src/build/exe/main/debug/p2p-daemon
+CMD ./gradlew generateProtocGrpc generateProtocCpp copyProtoHeaders copyProtoSource main:build test:build test:run
